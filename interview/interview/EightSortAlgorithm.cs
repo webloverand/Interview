@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EightSortAlgorithm
 {
-    public static class SortExtention
+    public class SortExtention
     {
         #region 冒泡排序
         /*
@@ -23,21 +23,19 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 冒泡排序，结果升序排列
-        /// <para>调用：arry.BubbleSort();</para>
+        /// <para>调用：array.BubbleSort();</para>
         /// </summary>
-        /// <param name="arry">要排序的整数数组</param>
-        public static void BubbleSort(this int[] arry)
+        /// <param name="array">要排序的整数数组</param>
+        public void BubbleSort<T>( T[] array,Comparison<T> comparison)
         {
-            for (int i = 0; i < arry.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
-                for (int j = 0; j < arry.Length - 1 - i; j++)
+                for (int j = 0; j < array.Length - 1 - i; j++)
                 {
                     //比较相邻的两个元素，如果前面的比后面的大，则交换位置
-                    if (arry[j] > arry[j + 1])
+                    if (comparison(array[j] , array[j + 1]) == 1)
                     {
-                        int temp = arry[j + 1];
-                        arry[j + 1] = arry[j];
-                        arry[j] = temp;
+                        Exchange(ref array[j],ref array[j + 1]);
                     }
                 }
             }
@@ -59,35 +57,35 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 快速排序
-        /// <para>调用：arry.QuickSort(0, arry.Length-1 );</para>
+        /// <para>调用：array.QuickSort(0, array.Length-1 );</para>
         /// </summary>
-        /// <param name="arry">要排序的数组</param>
+        /// <param name="array">要排序的数组</param>
         /// <param name="left">低位</param>
         /// <param name="right">高位</param>
-        public static void QuickSort(this int[] arry, int left, int right)
+        public void QuickSort<T>(T[] array, Comparison<T> comparison, int left, int right)
         {
-            //左边索引小于右边，则还未排序完成 　　
+            //左边小于右边说明排序还没有完成
             if (left < right)
             {
-                //取中间的元素作为比较基准，小于他的往左边移，大于他的往右边移 　　
-                int middle = arry[(left + right) / 2];
-                int i = left - 1;
+                T middle = array[(left + right) / 2];
+                //注意初始化
                 int j = right + 1;
+                int i = left - 1;
                 while (true)
                 {
-                    //移动下标，左边的往右移动，右边的向左移动
-                    while (arry[++i] < middle && i < right) ;
-                    while (arry[--j] > middle && j > 0) ;
+                    while (comparison(middle, array[++i]) > 0 && i < right) ;//左边,先加的原因是防止找到的最左边会超出界限
+                    while (comparison(middle, array[--j]) < 0 && j > 0) ; //右边
                     if (i >= j)
                         break;
-                    //交换位置
-                    int number = arry[i];
-                    arry[i] = arry[j];
-                    arry[j] = number;
-
+                    Exchange<T>(ref array[i], ref array[j]);
                 }
-                QuickSort(arry, left, i - 1);
-                QuickSort(arry, j + 1, right);
+                for (int m = 0; m < array.Length; m++)
+                {
+                    Console.Write(array[m] + " ");
+                }
+                Console.ReadLine();
+                QuickSort<T>(array, comparison, left, i - 1);
+                QuickSort<T>(array, comparison, j + 1, right);
             }
         }
         #endregion
@@ -107,27 +105,32 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 直接插入排序
-        /// <para>调用：arry.InsertSort();</para>
+        /// <para>调用：array.InsertSort();</para>
         /// </summary>
-        /// <param name="arry">要排序的数组</param>
-        public static void InsertSort(this int[] arry)
+        /// <param name="array">要排序的数组</param>
+        public void InsertSort<T>(T[] array,Comparison<T> comparison)
         {
             //直接插入排序是将待比较的数值与它的前一个数值进行比较，所以外层循环是从第二个数值开始的
-            for (int i = 1; i < arry.Length; i++)
+            for (int i = 1; i < array.Length; i++)
             {
-                int temp = arry[i];
+                T temp = array[i];
                 int j = i - 1;
 
                 // 在已排好序的数列段中找到比新数值小的数值
-                while (j >= 0 && arry[j] > temp)
+                while (j >= 0 && comparison(array[j] , temp) == 1)
                 {
                     //将比新数值大的数值向后移
-                    arry[j + 1] = arry[j];
+                    array[j + 1] = array[j];
                     j--;
                 }
                 // 如果在已排好序的数列段中找到了比新数值小的数值
                 // 将数值替换到此位置
-                arry[j + 1] = temp;
+                array[j + 1] = temp;
+                for (int m = 0; m < array.Length; m++)
+                {
+                    Console.Write(array[m] + " ");
+                }
+                Console.ReadLine();
             }
         }
         #endregion
@@ -155,53 +158,36 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 希尔排序
-        /// <para>调用：arry.ShellSort();</para>
+        /// <para>调用：array.ShellSort();</para>
         /// </summary>
-        /// <param name="arry">待排序的数组</param>
-        public static void ShellSort(this int[] arry)
+        /// <param name="array">待排序的数组</param>
+        public void ShellSort<T>(T[] array,Comparison<T> comparison)
         {
-            int length = arry.Length;
-            for (int h = length / 2; h > 0; h = h / 2)
+            int Length = array.Length;
+            for (int gap = Length / 2; gap > 0; gap = gap / 2) //分组，得到组数
             {
-                //here is insert sort
-                for (int i = h; i < length; i++)
+                for (int i = gap; i < gap * 2; i++)//对每一组进行插入排序
                 {
-                    int temp = arry[i];
-                    if (temp < arry[i - h])
+                    for (int j = i; j < Length; j += gap)
                     {
-                        for (int j = 0; j < i; j += h)
+                        T temp = array[j];
+                        int k = j - gap;
+                        while (k >= 0 && comparison(temp , array[k]) == -1)
                         {
-                            if (temp < arry[j])
-                            {
-                                temp = arry[j];
-                                arry[j] = arry[i];
-                                arry[i] = temp;
-                            }
+                            array[k + gap] = array[k];
+                            k = k - gap;
                         }
+                        array[k + gap] = temp;
+
                     }
                 }
-                for(int k = 0;k<length;k++)
+                for (int k = 0; k < Length; k++)
                 {
-                    Console.Write(arry[k] + " ");
+                    Console.Write(array[k] + " ");
                 }
                 Console.ReadLine();
             }
         }
-        //public void ShellSort(this int[] arry)
-        //{
-        //    int Length = arry.Length;
-        //    for (int gap = Length / 2; gap > 0; gap = gap / 2)
-        //    {
-        //        for (int i = gap; i < gap * 2; i++)
-        //        {
-        //            int temp = arry[i];
-        //            for (int j = i - gap; j >= i - gap; j += gap)
-        //            {
-
-        //            }
-        //        }
-        //    }
-        //}
         #endregion
 
         #region 简单选择排序
@@ -218,26 +204,28 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 简单选择排序
-        /// <para>调用：arry.SimpleSelectSort();</para>
+        /// <para>调用：array.SimpleSelectSort();</para>
         /// </summary>
-        /// <param name="arry">待排序的数组</param>
-        public static void SimpleSelectSort(this int[] arry)
+        /// <param name="array">待排序的数组</param>
+        public void SimpleSelectSort<T>( T[] array , Comparison<T> comparison)
         {
-            int tmp = 0;
-            int t = 0;//最小数标记
-            for (int i = 0; i < arry.Length; i++)
+            int k = 0;
+            for (int i=0;i<array.Length;i++)
             {
-                t = i;
-                for (int j = i + 1; j < arry.Length; j++)
+                k = i;
+                for (int j = i + 1;j<array.Length;j++)
                 {
-                    if (arry[t] > arry[j])
+                    if(comparison(array[k] , array[j]) == 1)
                     {
-                        t = j;
+                        k = j;
                     }
                 }
-                tmp = arry[i];
-                arry[i] = arry[t];
-                arry[t] = tmp;
+                Exchange(ref array[i],ref array[k]);
+                for (int m = 0;m<array.Length;m++)
+                {
+                    Console.Write(array[m] + " ");
+                }
+                Console.ReadLine();
             }
         }
         #endregion
@@ -252,55 +240,71 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 堆排序
-        /// <para>调用：arry.HeapSort(arry.Length);</para>
+        /// <para>调用：array.HeapSort(array.Length);</para>
         /// </summary>
-        /// <param name="arry">待排序的数组</param>
-        /// <param name="top"></param>
-        public static void HeapSort(this int[] arry, int top)
+        /// <param name="array">待排序的数组</param>、
+        public void HeapSort<T>(T[] array, Comparison<T> comparison)
         {
-            //List<int> topNode = new List<int>();
-
-            for (int i = arry.Length / 2 - 1; i >= 0; i--)
+            BuildMHeap<T>(array, comparison);
+            for (int m = 0; m < array.Length; m++)
             {
-                HeapAdjust(arry, i, arry.Length);
+                Console.Write(array[m] + " ");
             }
-
-            for (int i = arry.Length - 1; i >= arry.Length - top; i--)
+            Console.ReadLine();
+            for (int i = array.Length - 1; i > 0; i--)
             {
-                int temp = arry[0];
-                arry[0] = arry[i];
-                arry[i] = temp;
-                HeapAdjust(arry, 0, i);
+                Exchange(ref array[i], ref array[0]);
+                MHeapify<T>(array, 0, i, comparison);
+                for (int m = 0; m < array.Length; m++)
+                {
+                    Console.Write(array[m] + " ");
+                }
+                Console.ReadLine();
             }
         }
-
-        /// <summary>
-        /// 构建堆
-        /// </summary>
-        /// <param name="arry"></param>
-        /// <param name="parent"></param>
-        /// <param name="length"></param>
-        private static void HeapAdjust(int[] arry, int parent, int length)
+        //计算节点的父节点和子节点
+        private int Parrent(int i)
         {
-            int temp = arry[parent];
-
-            int child = 2 * parent + 1;
-
-            while (child < length)
+            return (i - 1) / 2;
+        }
+        private int Left(int i)
+        {
+            return 2 * i + 1;
+        }
+        private int Right(int i)
+        {
+            return 2 * i + 2;
+        }
+        //构建最大堆/最小堆
+        private void BuildMHeap<T>(T[] array, Comparison<T> comparison)
+        {
+            for (int i = array.Length / 2 - 1; i >= 0; i--)
             {
-                if (child + 1 < length && arry[child] < arry[child + 1]) child++;
+                MHeapify<T>(array, i, array.Length, comparison);
+                
+            }
+        }
+        private void MHeapify<T>(T[] array, int i, int heapSize, Comparison<T> comparison)
+        {
+            int left = Left(i);
+            int right = Right(i);
 
-                if (temp >= arry[child])
-                    break;
-
-                arry[parent] = arry[child];
-
-                parent = child;
-
-                child = 2 * parent + 1;
+            int extremumIndex = i;
+            if (left < heapSize && comparison(array[left], array[i]) > 0)
+            {
+                extremumIndex = left;
             }
 
-            arry[parent] = temp;
+            if (right < heapSize && comparison(array[right], array[extremumIndex]) > 0)
+            {
+                extremumIndex = right;
+            }
+
+            if (extremumIndex != i)
+            {
+                Exchange<T>(ref array[extremumIndex], ref array[i]);
+                MHeapify<T>(array, extremumIndex, heapSize, comparison);
+            }
         }
 
         #endregion
@@ -334,71 +338,74 @@ namespace EightSortAlgorithm
          */
         /// <summary>
         /// 归并排序
-        /// <para>调用：arry.MergeSort(0, arry.Length);</para>
+        /// <para>调用：array.MergeSort(0, array.Length);</para>
         /// </summary>
-        /// <param name="arry">待排序数组</param>
+        /// <param name="array">待排序数组</param>
         /// <param name="first"></param>
         /// <param name="last"></param>
-        public static void MergeSort(this int[] arry, int first, int last)
+        ///   //归并排序（目标数组，子表的起始位置，子表的终止位置）
+        public void MergeSortFunction<T>(T[] array, Comparison<T> comparison, int first, int last)
         {
-            if (first + 1 < last)
+            try
             {
-                int mid = (first + last) / 2;
-
-                MergeSort(arry, first, mid);
-                MergeSort(arry, mid, last);
-
-                Merger(arry, first, mid, last);
-            }
-        }
-        /// <summary>
-        /// 归并
-        /// </summary>
-        /// <param name="arry"></param>
-        /// <param name="first"></param>
-        /// <param name="mid"></param>
-        /// <param name="last"></param>
-        private static void Merger(int[] arry, int first, int mid, int last)
-        {
-            Queue<int> tempV = new Queue<int>();
-            //设置indexA，并扫描subArray1 [first,mid]
-            //设置indexB,并扫描subArray2 [mid,last]
-            int indexA = first;
-            int indexB = mid;
-            //在没有比较完两个子标的情况下，比较 v[indexA]和v[indexB]
-            //将其中小的放到临时变量tempV中
-            while (indexA < mid && indexB < last)
-            {
-                if (arry[indexA] < arry[indexB])
+                if (first < last)   //子表的长度大于1，则进入下面的递归处理
                 {
-                    tempV.Enqueue(arry[indexA]);
-                    indexA++;
-                }
-                else
-                {
-                    tempV.Enqueue(arry[indexB]);
-                    indexB++;
+                    int mid = (first + last) / 2;   //子表划分的位置
+                    MergeSortFunction(array,comparison, first, mid);   //对划分出来的左侧子表进行递归划分
+                    MergeSortFunction(array, comparison, mid + 1, last);    //对划分出来的右侧子表进行递归划分
+                    MergeSortCore(array, comparison, first, mid, last); //对左右子表进行有序的整合（归并排序的核心部分）
+
+                    for (int m = 0; m < array.Length; m++)
+                    {
+                        Console.Write(array[m] + " ");
+                    }
+                    Console.ReadLine();
                 }
             }
-            //复制没有比较完子表中的元素
-            while (indexA < mid)
-            {
-                tempV.Enqueue(arry[indexA]);
-                indexA++;
-            }
-            while (indexB < last)
-            {
-                tempV.Enqueue(arry[indexB]);
-                indexB++;
-            }
-            int index = 0;
-            while (tempV.Count > 0)
-            {
-                arry[first + index] = tempV.Dequeue();
-                index++;
-            }
+            catch (Exception ex)
+            { }
         }
 
+        //归并排序的核心部分：将两个有序的左右子表（以mid区分），合并成一个有序的表
+        private void MergeSortCore<T>(T[] array, Comparison<T> comparison, int first, int mid, int last)
+        {
+            try
+            {
+                int indexA = first; //左侧子表的起始位置
+                int indexB = mid + 1;   //右侧子表的起始位置
+                T[] temp = new T[last + 1]; //声明数组（暂存左右子表的所有有序数列）：长度等于左右子表的长度之和。
+                int tempIndex = 0;
+                while (indexA <= mid && indexB <= last) //进行左右子表的遍历，如果其中有一个子表遍历完，则跳出循环
+                {
+                    if (comparison(array[indexA] , array[indexB]) <= 0) //此时左子表的数 <= 右子表的数
+                    {
+                        temp[tempIndex++] = array[indexA++];    //将左子表的数放入暂存数组中，遍历左子表下标++
+                    }
+                    else//此时左子表的数 > 右子表的数
+                    {
+                        temp[tempIndex++] = array[indexB++];    //将右子表的数放入暂存数组中，遍历右子表下标++
+                    }
+                }
+                //有一侧子表遍历完后，跳出循环，将另外一侧子表剩下的数一次放入暂存数组中（有序）
+                while (indexA <= mid)
+                {
+                    temp[tempIndex++] = array[indexA++];
+                }
+                while (indexB <= last)
+                {
+                    temp[tempIndex++] = array[indexB++];
+                }
+
+                //将暂存数组中有序的数列写入目标数组的制定位置，使进行归并的数组段有序
+                tempIndex = 0;
+                for (int i = first; i <= last; i++)
+                {
+                    array[i] = temp[tempIndex++];
+                }
+            }
+            catch (Exception ex)
+            { }
+        }
         #endregion
 
         #region 基数排序
@@ -411,18 +418,18 @@ namespace EightSortAlgorithm
         /// <summary>
         /// 基数排序
         /// <para>约定：待排数字中没有0,如果某桶内数字为0则表示该桶未被使用,输出时跳过即可</para>
-        /// <para>调用：arry.RadixSort();</para>
+        /// <para>调用：array.RadixSort();</para>
         /// </summary>
-        /// <param name="arry">待排数组</param>
+        /// <param name="array">待排数组</param>
         /// <param name="array_x">桶数组第一维长度</param>
         /// <param name="array_y">桶数组第二维长度</param>
-        public static void RadixSort(this int[] arry, int array_x = 10, int array_y = 100)
+        public static void RadixSort( int[] array, int array_x = 10, int array_y = 100)
         {
             /* 最大数字不超过999999999...(array_x个9) */
             for (int i = 0; i < array_x; i++)
             {
                 int[,] bucket = new int[array_x, array_y];
-                foreach (var item in arry)
+                foreach (var item in array)
                 {
                     int temp = (item / (int)Math.Pow(10, i)) % 10;
                     for (int l = 0; l < array_y; l++)
@@ -439,11 +446,39 @@ namespace EightSortAlgorithm
                     for (int y = 0; y < array_y; y++)
                     {
                         if (bucket[x, y] == 0) continue;
-                        arry[o++] = bucket[x, y];
+                        array[o++] = bucket[x, y];
                     }
                 }
             }
         }
+        #endregion
+
+        #region 辅助计算
+        #region 交换值
+        public void Exchange<T>(ref T x, ref T y)
+        {
+            T temp = x;
+            x = y;
+            y = temp;
+        }
+        #endregion
+        #region 比较两个int的值
+        public int ComparisonInt(int x,int y)
+        {
+            if(x > y)
+            {
+                return 1;
+            }
+            else if(x == y)
+            {
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        #endregion
         #endregion
     }
 }

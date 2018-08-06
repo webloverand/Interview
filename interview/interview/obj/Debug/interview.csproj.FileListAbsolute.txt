@@ -1,0 +1,7 @@
+D:\Project\VSProject\Interview\interview\interview\obj\Debug\interview.csprojAssemblyReference.cache
+D:\Project\VSProject\Interview\interview\interview\obj\Debug\interview.csproj.CoreCompileInputs.cache
+D:\Project\VSProject\Interview\interview\interview\bin\Debug\interview.exe.config
+D:\Project\VSProject\Interview\interview\interview\bin\Debug\interview.exe
+D:\Project\VSProject\Interview\interview\interview\bin\Debug\interview.pdb
+D:\Project\VSProject\Interview\interview\interview\obj\Debug\interview.exe
+D:\Project\VSProject\Interview\interview\interview\obj\Debug\interview.pdb

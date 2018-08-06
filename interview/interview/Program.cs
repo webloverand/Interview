@@ -11,7 +11,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        int[] arr = { 6, 5, 9, 16, 45, 35, 8, 13, 25, 60, 22, 31 };
-        arr.ShellSort();
+        SortExtention sortExtention = new SortExtention();
+        int[] arr = { 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+        sortExtention.MergeSortFunction(arr, sortExtention.ComparisonInt,0,arr.Length-1);
     }
 }
